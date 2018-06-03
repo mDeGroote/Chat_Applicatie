@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FXMLDocumentController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;Killer_App&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">killer_app</a> &gt; <span class="el_source">FXMLDocumentController.java</span></div><h1>FXMLDocumentController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package killer_app;
+
+import Models.LoginController;
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import Models.*;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.stage.Stage;
+
+/**
+ *
+ * @author Marc
+ */
+<span class="nc" id="L29">public class FXMLDocumentController implements Initializable {</span>
+    
+    @FXML Label label;
+    @FXML TextField usernameField;
+    @FXML TextField passwordField;
+    private LoginController loginController;
+<span class="nc" id="L35">    private Client client = new Client();</span>
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+<span class="nc" id="L39">    }</span>
+    
+    
+
+    public void Login() throws IOException {
+<span class="nc bnc" id="L44" title="All 4 branches missed.">        if(!usernameField.getText().isEmpty() &amp;&amp; !passwordField.getText().isEmpty()) {</span>
+            try{
+<span class="nc" id="L46">                loginController = new LoginController();</span>
+            }
+<span class="nc" id="L48">            catch(Exception ex) {</span>
+<span class="nc" id="L49">                Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L50">                alert.setTitle(&quot;Servers down&quot;);</span>
+<span class="nc" id="L51">                alert.setContentText(&quot;The servers are currently not responding, try again later&quot;);</span>
+<span class="nc" id="L52">                alert.show();</span>
+<span class="nc" id="L53">                return;</span>
+<span class="nc" id="L54">            }</span>
+<span class="nc" id="L55">            User user = loginController.Login(usernameField.getText(), passwordField.getText());</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if(user == null) {</span>
+<span class="nc" id="L57">                Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L58">                alert.setTitle(&quot;Invalid login&quot;);</span>
+<span class="nc" id="L59">                alert.setContentText(&quot;Invalid username and password&quot;);</span>
+<span class="nc" id="L60">                alert.show();</span>
+<span class="nc" id="L61">                return;</span>
+            }
+<span class="nc" id="L63">            FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L64">            loader.setLocation(getClass().getResource(&quot;MainScreen.fxml&quot;));</span>
+<span class="nc" id="L65">            loader.load();</span>
+<span class="nc" id="L66">            Thread thread = new Thread(new Runnable() {</span>
+                @Override
+                public void run() {
+<span class="nc" id="L69">                    MainScreenController controller = loader.getController();</span>
+<span class="nc" id="L70">                    controller.SetUser(user);</span>
+<span class="nc" id="L71">                }</span>
+            });
+<span class="nc" id="L73">            thread.start();</span>
+<span class="nc" id="L74">            Parent root = loader.getRoot();</span>
+<span class="nc" id="L75">            Stage stage = new Stage();</span>
+<span class="nc" id="L76">            stage.setScene(new Scene(root));</span>
+<span class="nc" id="L77">            Stage oldstage = (Stage)usernameField.getScene().getWindow();</span>
+<span class="nc" id="L78">            oldstage.close();</span>
+<span class="nc" id="L79">            stage.show();</span>
+        }
+<span class="nc" id="L81">    }</span>
+    
+    public void toRegister() {
+<span class="nc" id="L84">        FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L85">        loader.setLocation(getClass().getResource(&quot;Register.fxml&quot;));</span>
+        try {
+<span class="nc" id="L87">            loader.load();</span>
+<span class="nc" id="L88">        } catch (IOException ex) {</span>
+<span class="nc" id="L89">            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L90">        }</span>
+<span class="nc" id="L91">        Parent root = loader.getRoot();</span>
+<span class="nc" id="L92">        Stage stage = new Stage();</span>
+<span class="nc" id="L93">        stage.setScene(new Scene(root));</span>
+<span class="nc" id="L94">        Stage oldstage = (Stage)usernameField.getScene().getWindow();</span>
+<span class="nc" id="L95">        oldstage.close();</span>
+<span class="nc" id="L96">        stage.show();</span>
+<span class="nc" id="L97">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

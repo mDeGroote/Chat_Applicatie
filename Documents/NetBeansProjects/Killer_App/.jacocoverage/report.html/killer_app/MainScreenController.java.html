@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MainScreenController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;Killer_App&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">killer_app</a> &gt; <span class="el_source">MainScreenController.java</span></div><h1>MainScreenController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package killer_app;
+
+import Models.RMIMainScreenController;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.stage.Stage;
+import Models.*;
+import java.rmi.RemoteException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+/**
+ * FXML Controller class
+ *
+ * @author Marc
+ */
+<span class="nc" id="L38">public class MainScreenController implements Initializable{</span>
+    @FXML Button Logout;
+    @FXML TableView&lt;ChatInfo&gt; Table;
+    @FXML TableColumn chatname;
+    @FXML TableColumn numberofmembers;
+    @FXML TableColumn newmessages;
+    private User user;
+<span class="nc" id="L45">    private ObservableList&lt;ChatInfo&gt; info = FXCollections.observableArrayList();</span>
+    private RMIMainScreenController RMIMainScreenController;
+<span class="nc" id="L47">    private ExecutorService threadPool = Executors.newCachedThreadPool();</span>
+    
+    
+    /**
+     * Initializes the controller class.
+     */
+    @Override
+    public void initialize(URL url, ResourceBundle rb){
+<span class="nc" id="L55">        chatname.setCellValueFactory(new PropertyValueFactory&lt;ChatInfo, String&gt;(&quot;name&quot;));</span>
+<span class="nc" id="L56">        numberofmembers.setCellValueFactory(new PropertyValueFactory&lt;ChatInfo, Integer&gt;(&quot;numberOfMembers&quot;));</span>
+<span class="nc" id="L57">        newmessages.setCellValueFactory(new PropertyValueFactory&lt;ChatInfo, Integer&gt;(&quot;newMessages&quot;));</span>
+<span class="nc" id="L58">        Table.setItems(info);</span>
+<span class="nc" id="L59">    }</span>
+    
+    public void SetUser(User user) {
+<span class="nc" id="L62">        this.user = user;</span>
+        try {
+<span class="nc" id="L64">            RMIMainScreenController = new RMIMainScreenController(this, user);</span>
+<span class="nc" id="L65">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L66">            Platform.runLater(new AlertRunnable(&quot;Servers down&quot;, &quot;The servers aren't responding. You might not see the information you requested, please try again later&quot;, Alert.AlertType.ERROR) {</span>
+            });
+<span class="nc" id="L68">            return;</span>
+<span class="nc" id="L69">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L70">            Platform.runLater(new AlertRunnable(&quot;Servers down&quot;, &quot;The servers aren't responding. You might not see the information you requested, please try again later&quot;, Alert.AlertType.ERROR) {</span>
+            });
+<span class="nc" id="L72">            return;</span>
+<span class="nc" id="L73">        }</span>
+<span class="nc" id="L74">        AddChats();</span>
+<span class="nc" id="L75">    }</span>
+
+    public void Logout() throws IOException{
+<span class="nc" id="L78">        Parent root = FXMLLoader.load(getClass().getResource(&quot;FXMLDocument.fxml&quot;));</span>
+<span class="nc" id="L79">        Scene scene = new Scene(root);</span>
+<span class="nc" id="L80">        Stage stage = (Stage)Logout.getScene().getWindow();</span>
+<span class="nc" id="L81">        stage.close();</span>
+<span class="nc" id="L82">        Stage newStage = new Stage();</span>
+<span class="nc" id="L83">        newStage.setScene(scene);</span>
+<span class="nc" id="L84">        threadPool.execute(new Runnable() {</span>
+            @Override
+            public void run() {
+<span class="nc" id="L87">                user.SetStatus(Status.Offline);</span>
+                try{
+<span class="nc" id="L89">                    RMIMainScreenController.SetUserStatus(user);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                    for(ChatInfo chatInfo : info) {</span>
+<span class="nc" id="L91">                        RMIMainScreenController.UnsubscribeToChat(chatInfo);</span>
+<span class="nc" id="L92">                    }</span>
+                }
+<span class="nc" id="L94">                catch(NullPointerException ex) {</span>
+<span class="nc" id="L95">                }</span>
+<span class="nc" id="L96">            }</span>
+        });
+<span class="nc" id="L98">        threadPool.shutdown();</span>
+<span class="nc" id="L99">        newStage.show();</span>
+<span class="nc" id="L100">    }</span>
+    
+    public void AddChats() {
+        try{
+<span class="nc" id="L104">            info.addAll(RMIMainScreenController.GetChats(user));</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            for(ChatInfo chatInfo: info) {</span>
+<span class="nc" id="L106">                RMIMainScreenController.SubscribeToChat(chatInfo);</span>
+<span class="nc" id="L107">            }</span>
+        }
+<span class="nc" id="L109">        catch(NullPointerException ex) {</span>
+<span class="nc" id="L110">            Platform.runLater(new AlertRunnable(&quot;Servers down&quot;, &quot;The servers aren't responding. You might not see the information you requested, please try again later&quot;, Alert.AlertType.ERROR) {</span>
+            });
+<span class="nc" id="L112">        }</span>
+<span class="nc" id="L113">    }</span>
+    
+    public void NewMessage(ChatMessage chatMessage) {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        for(ChatInfo chatInfo: info) {</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            if(chatInfo.getName().equals(chatMessage.GetReciever())) {</span>
+<span class="nc" id="L118">                info.remove(chatInfo);</span>
+<span class="nc" id="L119">                chatInfo.setNewMessages(chatInfo.getNewMessages() + 1);</span>
+<span class="nc" id="L120">                info.add(chatInfo);</span>
+            }
+<span class="nc" id="L122">        }</span>
+<span class="nc" id="L123">    }</span>
+    
+    public void toFriendList() {
+<span class="nc" id="L126">        FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L127">        loader.setLocation(getClass().getResource(&quot;FriendList.fxml&quot;));</span>
+        try {
+<span class="nc" id="L129">            loader.load();</span>
+<span class="nc" id="L130">        } catch (IOException ex) {</span>
+<span class="nc" id="L131">            Logger.getLogger(MainScreenController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L132">        }</span>
+<span class="nc" id="L133">        Thread thread = new Thread(new Runnable() {</span>
+            @Override
+            public void run() {
+<span class="nc" id="L136">                FriendListController controller = loader.getController();</span>
+<span class="nc" id="L137">                controller.setUser(user);</span>
+<span class="nc" id="L138">            }</span>
+        });
+<span class="nc" id="L140">        threadPool.execute(thread);</span>
+<span class="nc" id="L141">        Parent root = loader.getRoot();</span>
+<span class="nc" id="L142">        Stage stage = new Stage();</span>
+<span class="nc" id="L143">        stage.setScene(new Scene(root));</span>
+<span class="nc" id="L144">        Stage oldstage = (Stage)Table.getScene().getWindow();</span>
+<span class="nc" id="L145">        oldstage.close();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        for(ChatInfo chatInfo: info) {</span>
+            try{
+<span class="nc" id="L148">                RMIMainScreenController.UnsubscribeToChat(chatInfo);               </span>
+            }
+<span class="nc" id="L150">            catch(NullPointerException ex) {             </span>
+<span class="nc" id="L151">            }</span>
+<span class="nc" id="L152">        }</span>
+<span class="nc" id="L153">        stage.show();</span>
+<span class="nc" id="L154">    }</span>
+    
+    public void OpenChat() {
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if(Table.getSelectionModel().getSelectedItem() != null) {</span>
+<span class="nc" id="L158">            ChatInfo chatInfo = Table.getSelectionModel().getSelectedItem();</span>
+<span class="nc" id="L159">            Chat chat = RMIMainScreenController.GetChat(chatInfo.getName());</span>
+<span class="nc" id="L160">            FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L161">            loader.setLocation(getClass().getResource(&quot;Chat.fxml&quot;));</span>
+            try {
+<span class="nc" id="L163">                loader.load();</span>
+<span class="nc" id="L164">            } catch (IOException ex) {</span>
+<span class="nc" id="L165">                Logger.getLogger(MainScreenController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L166">            }</span>
+<span class="nc" id="L167">            Thread thread = new Thread(new Runnable() {</span>
+                @Override
+                public void run() {
+<span class="nc" id="L170">                    ChatController controller = loader.getController();</span>
+                    try{
+<span class="nc" id="L172">                        controller.SetFields(user, chat);                  </span>
+                    }
+<span class="nc" id="L174">                    catch(RuntimeException ex) {                       </span>
+<span class="nc" id="L175">                    }</span>
+<span class="nc" id="L176">                }</span>
+            });
+<span class="nc" id="L178">            threadPool.execute(thread);</span>
+<span class="nc" id="L179">            Parent root = loader.getRoot();</span>
+<span class="nc" id="L180">            Stage stage = new Stage();</span>
+<span class="nc" id="L181">            stage.setScene(new Scene(root));</span>
+<span class="nc" id="L182">            Stage oldstage = (Stage)Table.getScene().getWindow();</span>
+<span class="nc" id="L183">            oldstage.close();</span>
+            try{
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                for(ChatInfo chatToUnsubscribe: info) {</span>
+<span class="nc" id="L186">                    RMIMainScreenController.UnsubscribeToChat(chatToUnsubscribe);</span>
+<span class="nc" id="L187">                }</span>
+            }
+<span class="nc" id="L189">            catch(NullPointerException ex) {</span>
+                
+<span class="nc" id="L191">            }</span>
+<span class="nc" id="L192">            stage.show();</span>
+        }
+<span class="nc" id="L194">    }</span>
+    
+    public void ToMessages() {
+<span class="nc" id="L197">        FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L198">        loader.setLocation(getClass().getResource(&quot;Messages.fxml&quot;));</span>
+        try {
+<span class="nc" id="L200">            loader.load();</span>
+<span class="nc" id="L201">        } catch (IOException ex) {</span>
+<span class="nc" id="L202">            Logger.getLogger(MainScreenController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L203">        }</span>
+<span class="nc" id="L204">        Thread thread = new Thread(new Runnable() {</span>
+            @Override
+            public void run() {
+<span class="nc" id="L207">                MessagesController messagesController = loader.getController();</span>
+<span class="nc" id="L208">                messagesController.SetUser(user);</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">                for(ChatInfo chatInfo: info) {</span>
+<span class="nc" id="L210">                    RMIMainScreenController.UnsubscribeToChat(chatInfo);</span>
+<span class="nc" id="L211">                }</span>
+<span class="nc" id="L212">            }</span>
+        });
+<span class="nc" id="L214">        threadPool.execute(thread);</span>
+<span class="nc" id="L215">        Parent root = loader.getRoot();</span>
+<span class="nc" id="L216">        Stage stage = new Stage();</span>
+<span class="nc" id="L217">        stage.setScene(new Scene(root));</span>
+<span class="nc" id="L218">        Stage oldStage = (Stage)Table.getScene().getWindow();</span>
+<span class="nc" id="L219">        oldStage.close();</span>
+<span class="nc" id="L220">        stage.show();</span>
+<span class="nc" id="L221">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

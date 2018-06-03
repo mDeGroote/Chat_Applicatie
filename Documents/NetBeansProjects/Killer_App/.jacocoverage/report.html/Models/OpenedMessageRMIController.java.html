@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>OpenedMessageRMIController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;Killer_App&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">Models</a> &gt; <span class="el_source">OpenedMessageRMIController.java</span></div><h1>OpenedMessageRMIController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Models;
+
+import Database.IDatabase;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import killer_app.OpenedMessageController;
+
+/**
+ *
+ * @author Marc
+ */
+public class OpenedMessageRMIController extends UnicastRemoteObject{
+    private OpenedMessageController controller;
+    private Registry registry;
+    private IDatabase database;
+
+<span class="nc" id="L25">    public OpenedMessageRMIController(OpenedMessageController controller) throws RemoteException{</span>
+<span class="nc" id="L26">        this.controller = controller;</span>
+        try {
+<span class="nc" id="L28">            this.registry = LocateRegistry.getRegistry(&quot;127.0.0.1&quot;, 1099);</span>
+<span class="nc" id="L29">            this.database = (IDatabase)registry.lookup(&quot;Database&quot;);</span>
+<span class="nc" id="L30">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L31">            throw new RemoteException(ex.getMessage());</span>
+<span class="nc" id="L32">        } catch (NotBoundException ex) {</span>
+<span class="nc" id="L33">            throw new RuntimeException();</span>
+<span class="nc" id="L34">        }</span>
+<span class="nc" id="L35">    }</span>
+    
+    public void RemoveMessage(IMessage message) {
+<span class="nc" id="L38">        database.RemoveMessage(message);</span>
+<span class="nc" id="L39">    }</span>
+    
+    public void AcceptGroupInvitation(GroupInvitation groupInvitation) {
+<span class="nc" id="L42">        database.AcceptGroupInvitation(groupInvitation);</span>
+<span class="nc" id="L43">    }</span>
+    
+    public void AcceptFriendRequest(IMessage message, User reciever) {
+<span class="nc" id="L46">        database.AcceptFriendRequest(message, reciever);</span>
+<span class="nc" id="L47">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

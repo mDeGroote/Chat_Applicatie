@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="586.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="killer_app.MessagesController">
+   <children>
+      <TableView fx:id="table" layoutX="8.0" layoutY="14.0" prefHeight="200.0" prefWidth="568.0">
+        <columns>
+          <TableColumn fx:id="sender" prefWidth="121.0" text="Sender" />
+          <TableColumn fx:id="text" prefWidth="446.0" text="Text" />
+        </columns>
+      </TableView>
+      <Button layoutX="14.0" layoutY="355.0" mnemonicParsing="false" onAction="#Back" text="Back" />
+      <Button layoutX="14.0" layoutY="222.0" mnemonicParsing="false" onAction="#OpenMessage" text="Open" />
+      <Button layoutX="14.0" layoutY="262.0" mnemonicParsing="false" onAction="#ToSendMessage" text="Send a message" />
+      <Button layoutX="78.0" layoutY="222.0" mnemonicParsing="false" onAction="#RemoveMessage" text="Remove message" />
+   </children>
+</AnchorPane>

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ChatController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;Killer_App&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">killer_app</a> &gt; <span class="el_source">ChatController.java</span></div><h1>ChatController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package killer_app;
+
+import Models.*;
+import java.beans.PropertyChangeEvent;
+import java.io.IOException;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
+
+/**
+ * FXML Controller class
+ *
+ * @author Marc
+ */
+<span class="nc" id="L39">public class ChatController implements Initializable {</span>
+    @FXML TextField textmessage;
+    @FXML TableView&lt;ChatMessage&gt; table;
+    @FXML TableColumn sender;
+    @FXML TableColumn text;
+    @FXML ComboBox&lt;User&gt; friends;
+<span class="nc" id="L45">    private ObservableList messages = FXCollections.observableArrayList();</span>
+    private User user;
+    private Chat chat;
+    private ChatRMIController controller;
+<span class="nc" id="L49">    private ExecutorService threadpool = Executors.newCachedThreadPool();</span>
+    /**
+     * Initializes the controller class.
+     */
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+<span class="nc" id="L55">        sender.setCellValueFactory(new PropertyValueFactory&lt;ChatMessage, String&gt;(&quot;sendername&quot;));</span>
+<span class="nc" id="L56">        text.setCellValueFactory(new PropertyValueFactory&lt;ChatMessage, String&gt;(&quot;text&quot;));</span>
+<span class="nc" id="L57">        table.setItems(messages);</span>
+<span class="nc" id="L58">    }</span>
+    
+    public void SetFields(User user, Chat chat) {
+<span class="nc" id="L61">        this.user = user;</span>
+<span class="nc" id="L62">        friends.setItems(FXCollections.observableArrayList());</span>
+<span class="nc" id="L63">        friends.getItems().addAll(user.getFriends());</span>
+<span class="nc" id="L64">        this.chat = chat;</span>
+        try {
+<span class="nc" id="L66">            controller = new ChatRMIController(this, chat.GetName());            </span>
+<span class="nc" id="L67">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L68">            Platform.runLater(new AlertRunnable(&quot;Servers down&quot;, &quot;The servers aren't responding. You might not see the information you requested, please try again later&quot;, Alert.AlertType.ERROR){</span>
+            });
+<span class="nc" id="L70">            return;</span>
+        }
+<span class="nc" id="L72">        catch(RuntimeException ex) {</span>
+<span class="nc" id="L73">            Platform.runLater(new AlertRunnable(&quot;Servers down&quot;, &quot;The servers aren't responding. You might not see the information you requested, please try again later&quot;, Alert.AlertType.ERROR){</span>
+            });
+<span class="nc" id="L75">            return;</span>
+<span class="nc" id="L76">        }</span>
+        try{
+<span class="nc" id="L78">            messages.addAll(this.chat.GetMessages());</span>
+        }
+<span class="nc" id="L80">        catch(NullPointerException ex) {</span>
+            
+<span class="nc" id="L82">        }</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        for(User friend: user.getFriends()) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            for(User chatuser: this.chat.GetUsers()) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                if(chatuser.getName().equals(friend.getName())) {</span>
+<span class="nc" id="L86">                    friends.getItems().remove(friend);</span>
+                }
+<span class="nc" id="L88">            }</span>
+<span class="nc" id="L89">        }</span>
+<span class="nc" id="L90">    }</span>
+
+    public void SendMessage() {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if(controller == null) {</span>
+            try{
+<span class="nc" id="L95">                controller = new ChatRMIController(this, chat.GetName());</span>
+<span class="nc" id="L96">            } catch (RemoteException ex) {</span>
+<span class="nc" id="L97">                    Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L98">                    alert.setTitle(&quot;Servers down&quot;);</span>
+<span class="nc" id="L99">                    alert.setContentText(&quot;The servers aren't responding. The message could not be sent, please try again later&quot;);</span>
+<span class="nc" id="L100">                    alert.show();</span>
+<span class="nc" id="L101">                    return;</span>
+            }
+<span class="nc" id="L103">            catch(RuntimeException ex) {</span>
+<span class="nc" id="L104">                    Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L105">                    alert.setTitle(&quot;Servers down&quot;);</span>
+<span class="nc" id="L106">                    alert.setContentText(&quot;The servers aren't responding. The message could not be sent, please try again later&quot;);</span>
+<span class="nc" id="L107">                    alert.show();</span>
+<span class="nc" id="L108">                    return;</span>
+<span class="nc" id="L109">            }</span>
+        }
+<span class="nc" id="L111">        threadpool.execute(new Runnable() {</span>
+            @Override
+            public void run() {
+<span class="nc" id="L114">                ChatMessage chatMessage = new ChatMessage(chat.GetName(), user, textmessage.getText());</span>
+<span class="nc" id="L115">                controller.SendMessage(chatMessage);</span>
+<span class="nc" id="L116">            }</span>
+        });
+<span class="nc" id="L118">    }</span>
+    
+    public void GetMessage(PropertyChangeEvent event) {
+<span class="nc" id="L121">        ChatMessage chatMessage = (ChatMessage)event.getNewValue();</span>
+<span class="nc" id="L122">        messages.add(chatMessage);</span>
+<span class="nc" id="L123">    }</span>
+    
+    public void Back() {
+<span class="nc" id="L126">        FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L127">        loader.setLocation(getClass().getResource(&quot;MainScreen.fxml&quot;));</span>
+        try {
+<span class="nc" id="L129">            loader.load();</span>
+<span class="nc" id="L130">        } catch (IOException ex) {</span>
+<span class="nc" id="L131">            Logger.getLogger(FriendListController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L132">        }</span>
+<span class="nc" id="L133">        threadpool.execute(new Runnable() {</span>
+            @Override
+            public void run() {
+<span class="nc" id="L136">                controller.UnsubscribeListener(chat.GetName());</span>
+<span class="nc" id="L137">                MainScreenController mainScreenController = loader.getController();</span>
+                try{
+<span class="nc" id="L139">                    mainScreenController.SetUser(user);</span>
+                }
+<span class="nc" id="L141">                catch(RuntimeException ex) {</span>
+                    
+<span class="nc" id="L143">                }</span>
+<span class="nc" id="L144">            }</span>
+        });
+<span class="nc" id="L146">        Parent root = loader.getRoot();</span>
+<span class="nc" id="L147">        Stage stage = new Stage();</span>
+<span class="nc" id="L148">        stage.setScene(new Scene(root));</span>
+<span class="nc" id="L149">        Stage oldStage = (Stage)table.getScene().getWindow();</span>
+<span class="nc" id="L150">        oldStage.close();</span>
+<span class="nc" id="L151">        threadpool.shutdown();</span>
+<span class="nc" id="L152">        stage.show();</span>
+<span class="nc" id="L153">    }</span>
+    
+    public void AddUser() {
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if(friends.getSelectionModel().getSelectedItem() != null) {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            if(controller == null) {</span>
+                try{
+<span class="nc" id="L159">                    controller = new ChatRMIController(this, chat.GetName());</span>
+<span class="nc" id="L160">                } catch (RemoteException ex) {</span>
+<span class="nc" id="L161">                    Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L162">                    alert.setTitle(&quot;Servers down&quot;);</span>
+<span class="nc" id="L163">                    alert.setContentText(&quot;The servers aren't responding. The message could not be sent, please try again later&quot;);</span>
+<span class="nc" id="L164">                    alert.show();</span>
+<span class="nc" id="L165">                    return;</span>
+                }
+<span class="nc" id="L167">                catch(RuntimeException ex) {</span>
+<span class="nc" id="L168">                    Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L169">                    alert.setTitle(&quot;Servers down&quot;);</span>
+<span class="nc" id="L170">                    alert.setContentText(&quot;The servers aren't responding. The message could not be sent, please try again later&quot;);</span>
+<span class="nc" id="L171">                    alert.show();</span>
+<span class="nc" id="L172">                    return;</span>
+<span class="nc" id="L173">                }</span>
+            }
+<span class="nc" id="L175">            threadpool.execute(new Runnable() {</span>
+                @Override
+                public void run() {
+<span class="nc" id="L178">                    GroupInvitation groupInvitation = new GroupInvitation(friends.getSelectionModel().getSelectedItem(), new User(chat.GetName()), &quot;Would you like to join our group: &quot; + chat.GetName());</span>
+<span class="nc" id="L179">                    controller.AddToChat(groupInvitation);</span>
+<span class="nc" id="L180">                    Platform.runLater(new AlertRunnable(&quot;Groupinvitation sent&quot;, &quot;A groupinvitation has been sent to the user&quot;, Alert.AlertType.INFORMATION));</span>
+<span class="nc" id="L181">                }</span>
+            });
+        }
+<span class="nc" id="L184">    }</span>
+    
+    public void RemoveUser() {
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if(controller == null) {</span>
+            try{
+<span class="nc" id="L189">                controller = new ChatRMIController(this, chat.GetName());</span>
+<span class="nc" id="L190">            } catch (RemoteException ex) {</span>
+<span class="nc" id="L191">                Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L192">                alert.setTitle(&quot;Servers down&quot;);</span>
+<span class="nc" id="L193">                alert.setContentText(&quot;The servers aren't responding. The message could not be sent, please try again later&quot;);</span>
+<span class="nc" id="L194">                alert.show();</span>
+<span class="nc" id="L195">                return;</span>
+            }
+<span class="nc" id="L197">            catch(RuntimeException ex) {</span>
+<span class="nc" id="L198">                Alert alert = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L199">                alert.setTitle(&quot;Servers down&quot;);</span>
+<span class="nc" id="L200">                alert.setContentText(&quot;The servers aren't responding. The message could not be sent, please try again later&quot;);</span>
+<span class="nc" id="L201">                alert.show();</span>
+<span class="nc" id="L202">                return;</span>
+<span class="nc" id="L203">            }</span>
+        }
+<span class="nc" id="L205">        threadpool.execute(new Runnable() {</span>
+            @Override
+            public void run() {
+<span class="nc" id="L208">                controller.RemoveUserFromChat(user, chat);</span>
+<span class="nc" id="L209">            }</span>
+        });
+<span class="nc" id="L211">        FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L212">        loader.setLocation(getClass().getResource(&quot;MainScreen.fxml&quot;));</span>
+        try {
+<span class="nc" id="L214">            loader.load();</span>
+<span class="nc" id="L215">        } catch (IOException ex) {</span>
+<span class="nc" id="L216">            Logger.getLogger(ChatController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L217">        }</span>
+<span class="nc" id="L218">        threadpool.execute(new Runnable() {</span>
+            @Override
+            public void run() {
+<span class="nc" id="L221">                MainScreenController mainScreenController = loader.getController();</span>
+<span class="nc" id="L222">                mainScreenController.SetUser(user);</span>
+<span class="nc" id="L223">            }</span>
+        });
+<span class="nc" id="L225">        Parent root = loader.getRoot();</span>
+<span class="nc" id="L226">        Stage stage = new Stage();</span>
+<span class="nc" id="L227">        stage.setScene(new Scene(root));</span>
+<span class="nc" id="L228">        Stage oldStage = (Stage)table.getScene().getWindow();</span>
+<span class="nc" id="L229">        oldStage.close();</span>
+<span class="nc" id="L230">        threadpool.shutdown();</span>
+<span class="nc" id="L231">        stage.show();</span>
+<span class="nc" id="L232">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

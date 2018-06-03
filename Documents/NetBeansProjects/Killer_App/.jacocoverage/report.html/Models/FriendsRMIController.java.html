@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FriendsRMIController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;Killer_App&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">Models</a> &gt; <span class="el_source">FriendsRMIController.java</span></div><h1>FriendsRMIController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Models;
+
+import Database.IDatabase;
+import java.beans.PropertyChangeEvent;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import killer_app.FriendListController;
+
+/**
+ *
+ * @author Marc
+ */
+public class FriendsRMIController extends UnicastRemoteObject implements IListener{
+    private FriendListController friendListController;
+    private Registry registry;
+    private IPublisher publisher;
+    private IDatabase database;
+
+<span class="nc" id="L30">    public FriendsRMIController(FriendListController friendListController) throws RemoteException{</span>
+<span class="nc" id="L31">        this.friendListController = friendListController;</span>
+        try {
+<span class="nc" id="L33">            registry = LocateRegistry.getRegistry(&quot;127.0.0.1&quot;, 1099);</span>
+<span class="nc" id="L34">            database = (IDatabase) registry.lookup(&quot;Database&quot;);</span>
+<span class="nc" id="L35">            publisher = (IPublisher)registry.lookup(&quot;ChatServer&quot;);</span>
+<span class="nc" id="L36">            publisher.SubscribeListener(this, &quot;FriendInfo&quot;);</span>
+<span class="nc" id="L37">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L38">            throw new RemoteException(ex.getMessage());</span>
+<span class="nc" id="L39">        } catch (NotBoundException ex) {</span>
+<span class="nc" id="L40">            throw new RuntimeException();</span>
+<span class="nc" id="L41">        }</span>
+<span class="nc" id="L42">    }</span>
+    
+    
+
+    @Override
+    public void PropertyChange(PropertyChangeEvent event) throws RemoteException {
+<span class="nc" id="L48">        friendListController.setFriendStatus(event);</span>
+<span class="nc" id="L49">    }</span>
+    
+    public void SendFriendRequest(User reciever, User sender) {
+        try{
+<span class="nc" id="L53">            database.FriendRequest(reciever, sender);</span>
+        }
+<span class="nc" id="L55">        catch(IllegalArgumentException ex) {</span>
+<span class="nc" id="L56">            throw new IllegalArgumentException(ex);</span>
+<span class="nc" id="L57">        }</span>
+<span class="nc" id="L58">    }</span>
+    
+    public void RemoveFriend(User user1, User user2) {
+<span class="nc" id="L61">        database.RemoveFriend(user1, user2);</span>
+<span class="nc" id="L62">    }</span>
+    
+    public void CreateGroupChat(ArrayList&lt;User&gt; users, String chatname) {
+<span class="nc" id="L65">        database.CreateChat(users, chatname);</span>
+<span class="nc" id="L66">    }</span>
+    
+    public void SetUserStatus(User user) {
+        try {
+<span class="nc" id="L70">            publisher.setUserStatus(user);</span>
+<span class="nc" id="L71">            publisher.Inform(&quot;FriendInfo&quot;, null, user);</span>
+<span class="nc" id="L72">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L73">            Logger.getLogger(FriendsRMIController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L74">        }</span>
+<span class="nc" id="L75">    }</span>
+    
+    public void UnsubscribeListener() {
+        try {
+<span class="nc" id="L79">            publisher.UnsubscribeListener(this, &quot;FriendInfo&quot;);</span>
+<span class="nc" id="L80">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L81">            Logger.getLogger(FriendsRMIController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L82">        }</span>
+<span class="nc" id="L83">    }</span>
+    
+    public ArrayList&lt;User&gt; GetFriendsStatus(User user) {
+        try {
+<span class="nc" id="L87">            ArrayList&lt;User&gt; friends = database.GetFriends(user);</span>
+<span class="nc" id="L88">            return publisher.getFriendsStatus(friends);</span>
+<span class="nc" id="L89">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L90">            Logger.getLogger(FriendsRMIController.class.getName()).log(Level.SEVERE, null, ex);</span>
+        }
+<span class="nc" id="L92">        return null;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

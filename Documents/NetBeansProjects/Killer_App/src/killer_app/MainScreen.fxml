@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="409.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="killer_app.MainScreenController">
+   <children>
+      <TableView fx:id="Table" layoutX="22.0" layoutY="74.0" prefHeight="200.0" prefWidth="568.0">
+        <columns>
+          <TableColumn fx:id="chatname" prefWidth="205.0" text="Chat name:" />
+          
+          <TableColumn fx:id="numberofmembers" prefWidth="202.0" text="Number of members:" />
+            <TableColumn fx:id="newmessages" prefWidth="160.0" text="New messages:" />
+        </columns>
+      </TableView>
+      <Button layoutX="22.0" layoutY="289.0" mnemonicParsing="false" onAction="#OpenChat" text="Open" />
+      <Button fx:id="Logout" layoutX="515.0" layoutY="364.0" mnemonicParsing="false" onAction="#Logout" text="Logout" />
+      <Button layoutX="514.0" layoutY="289.0" mnemonicParsing="false" onAction="#toFriendList" text="Friends" />
+      <Button layoutX="504.0" layoutY="329.0" mnemonicParsing="false" onAction="#ToMessages" text="Messages" />
+   </children>
+</AnchorPane>

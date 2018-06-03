@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="killer_app.OpenedMessageController">
+   <children>
+      <Button layoutX="23.0" layoutY="341.0" mnemonicParsing="false" onAction="#Back" text="Back" />
+      <Button fx:id="acceptButton" layoutX="157.0" layoutY="72.0" mnemonicParsing="false" onAction="#Accept" text="Accept" />
+      <Button fx:id="declineButton" layoutX="231.0" layoutY="72.0" mnemonicParsing="false" onAction="#Decline" text="Decline" />
+      <TextArea fx:id="messageText" layoutX="23.0" layoutY="14.0" prefHeight="48.0" prefWidth="562.0" />
+   </children>
+</AnchorPane>
